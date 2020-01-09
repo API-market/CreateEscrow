@@ -1,5 +1,5 @@
 
-# Create Bridge - A subsidized account creation contract
+# Create Escrow - A subsidized account creation contract
 It is not trivial to fund account creation on EOS. This contract simplifies the account creation for dapp developers.
 So they can focus on developing dapps and not worry about the complexity of account creation.
 
