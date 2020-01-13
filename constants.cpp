@@ -1,9 +1,4 @@
 #pragma once
-
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/asset.hpp>
-#include <eosio/time.hpp>
-
 #include "createescrow.hpp"
 
 namespace createescrow
@@ -58,7 +53,7 @@ asset create_escrow::getRamCost(uint64_t ram_bytes, uint64_t priceKey)
         RamInfo ramInfo(name("eosio"), name("eosio").value);
         auto ramData = ramInfo.find(S_RAM.raw());
         symbol coreSymbol = create_escrow::getCoreSymbol();
-        eosio_assert(ramData != ramInfo.end(), "Could not get RAM info");
+        check(ramData != ramInfo.end(), "Could not get RAM info");
 
         uint64_t base = ramData->base.balance.amount;
         uint64_t quote = ramData->quote.balance.amount;
@@ -109,7 +104,7 @@ auto create_escrow::getCpuLoanRecord(name account)
         i++;
     };
 
-    eosio_assert(false, ("No existing loan found for" + account.to_string()).c_str());
+    check(false, ("No existing loan found for" + account.to_string()).c_str());
 }
 
 auto create_escrow::getNetLoanRecord(name account)
@@ -129,6 +124,6 @@ auto create_escrow::getNetLoanRecord(name account)
         i++;
     };
 
-    eosio_assert(false, ("No existing loan found for" + account.to_string()).c_str());
+    check(false, ("No existing loan found for" + account.to_string()).c_str());
 }
 } // namespace createescrow

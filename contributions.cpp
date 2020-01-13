@@ -1,8 +1,4 @@
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/print.hpp>
-#include <eosiolib/action.hpp>
-#include <eosiolib/crypto.h>
-#include <algorithm>
+#include <eosio/system.hpp>
 #include <cstdlib>
 
 #include "createescrow.hpp"
@@ -99,7 +95,7 @@ void create_escrow::addBalance(const name &from, const asset &quantity, string &
             row.contributors.push_back({from, ram_balance, ram, net_balance, cpu_balance, totalaccounts, 0});
             row.balance = ram_balance;
             row.origin = dapp;
-            row.timestamp = now();
+            row.timestamp = eosio::current_time_point().sec_since_epoch();
         });
     else
         balances.modify(iterator, same_payer, [&](auto &row) {
@@ -118,7 +114,7 @@ void create_escrow::addBalance(const name &from, const asset &quantity, string &
             else
             {
                 row.contributors.push_back({from, ram_balance, ram, net_balance, cpu_balance, totalaccounts, 0});
-                row.timestamp = now();
+                row.timestamp = eosio::current_time_point().sec_since_epoch();
             }
             row.balance += ram_balance;
         });
@@ -136,8 +132,8 @@ void create_escrow::subBalance(string memo, string &origin, const asset &quantit
     balance::Balances balances(_self, _self.value);
     auto iterator = balances.find(id);
 
-    eosio_assert(iterator != balances.end(), "No balance object");
-    eosio_assert(iterator->balance.amount >= quantity.amount, "overdrawn balance");
+    check(iterator != balances.end(), "No balance object");
+    check(iterator->balance.amount >= quantity.amount, "overdrawn balance");
 
     balances.modify(iterator, same_payer, [&](auto &row) {
         auto pred = [memo](const balance::contributors &item) {
@@ -160,7 +156,7 @@ void create_escrow::subBalance(string memo, string &origin, const asset &quantit
         }
         else
         {
-            eosio_assert(false, ("The account " + memo + "not found as one of the contributors for " + origin).c_str());
+            check(false, ("The account " + memo + "not found as one of the contributors for " + origin).c_str());
         }
     });
 }
@@ -173,7 +169,7 @@ void create_escrow::subCpuOrNetBalance(string memo, string &origin, const asset 
     balance::Balances balances(_self, _self.value);
     auto iterator = balances.find(id);
 
-    eosio_assert(iterator != balances.end(), "No balance object");
+    check(iterator != balances.end(), "No balance object");
 
     balances.modify(iterator, same_payer, [&](auto &row) {
         auto pred = [memo](const balance::contributors &item) {
@@ -184,19 +180,19 @@ void create_escrow::subCpuOrNetBalance(string memo, string &origin, const asset 
         {
             if (type == "net")
             {
-                eosio_assert(itr->net_balance.amount >= quantity.amount, "overdrawn balance");
+                check(itr->net_balance.amount >= quantity.amount, "overdrawn balance");
                 itr->net_balance -= quantity;
             }
 
             if (type == "cpu")
             {
-                eosio_assert(itr->cpu_balance.amount >= quantity.amount, "overdrawn balance");
+                check(itr->cpu_balance.amount >= quantity.amount, "overdrawn balance");
                 itr->cpu_balance -= quantity;
             }
         }
         else
         {
-            eosio_assert(false, ("The account " + memo + " not found as one of the " + type + " contributors for " + origin).c_str());
+            check(false, ("The account " + memo + " not found as one of the " + type + " contributors for " + origin).c_str());
         }
     });
 }
