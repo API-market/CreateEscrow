@@ -34,7 +34,7 @@
                     "type": "contributors[]"
                 },
                 {
-                    "name": "balance",
+                    "name": "total_balance",
                     "type": "asset"
                 },
                 {
@@ -75,16 +75,24 @@
                     "type": "asset"
                 },
                 {
-                    "name": "ram",
+                    "name": "rex_balance",
+                    "type": "asset"
+                },
+                {
+                    "name": "total_spent",
+                    "type": "asset"
+                },
+                {
+                    "name": "total_staked",
+                    "type": "asset"
+                },
+                {
+                    "name": "total_spent_rex",
+                    "type": "asset"
+                },
+                {
+                    "name": "ram_contribution_percent",
                     "type": "int32"
-                },
-                {
-                    "name": "net_balance",
-                    "type": "asset"
-                },
-                {
-                    "name": "cpu_balance",
-                    "type": "asset"
                 },
                 {
                     "name": "totalaccounts",
