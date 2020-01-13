@@ -124,7 +124,7 @@ private:
 
   void addBalance(const name &from, const asset &quantity, string &memo);
   void subBalance(string memo, string & origin, const asset &quantity, bool memoIsDapp = false);
-  void subCpuOrNetBalance(string memo, string & origin, const asset &quantity, string type);
+  void subCpuOrNetBalance(string memo, string & origin, const asset &quantity, bool use_rex_balance = false);
 
   asset findContribution(string dapp, name contributor, string type);
   int findRamContribution(string dapp, name contributor);

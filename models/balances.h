@@ -1,19 +1,19 @@
 #pragma once
-#include <eosio/system.hpp>
 
 namespace balance
 {
-using namespace eosio;
 
 struct [[ eosio::table, eosio::contract("createescrow") ]] contributors
 {
     name contributor;
     asset balance; // used to pay for ram
-    int ram;       // percentage of ram cost the contributor wants to fund
-    asset net_balance;
-    asset cpu_balance;
-    int totalaccounts;   // specify the limit for the number of accounts to be created by the given contribution
-    int createdaccounts; // number of accounts created using the contributor's funds
+    asset rex_balance;
+    asset total_spent;
+    asset total_staked;
+    asset total_spent_rex;
+    int ram_contribution_percent; // percentage of ram cost the contributor wants to fund
+    int totalaccounts;            // specify the limit for the number of accounts to be created by the given contribution
+    int createdaccounts;          // number of accounts created using the contributor's funds
 };
 
 struct chosen_contributors
@@ -26,7 +26,7 @@ struct [[ eosio::table, eosio::contract("createescrow") ]] balances
 {
     uint64_t memo;
     vector<contributors> contributors;
-    asset balance;
+    asset total_balance;
     string origin;
     uint64_t timestamp;
 
