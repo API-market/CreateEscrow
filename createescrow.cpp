@@ -263,7 +263,8 @@ void create_escrow::transfer(const name &from, const name &to, const asset &quan
 {
     if (to != _self)
         return;
-    if (from == name("eosio.stake"))
+
+    if (from == name("eosio.stake") || from == name("eosio.rex"))
     {
         return create_escrow::addTotalUnstaked(quantity);
     };
