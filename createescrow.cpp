@@ -178,7 +178,7 @@ void create_escrow::reclaim(name reclaimer, string dapp, string sym)
                     reclaimer_balance = reclaimer_record->balance;
 
                     // only erase the contributor row if the cpu and net balances are also 0
-                    if (reclaimer_record->net_balance == asset(0'0000, create_escrow::getCoreSymbol()) && reclaimer_record->cpu_balance == asset(0'0000, create_escrow::getCoreSymbol()))
+                    if (reclaimer_record->rex_balance == asset(0'0000, create_escrow::getCoreSymbol()))
                     {
                         row.contributors.erase(reclaimer_record, row.contributors.end());
                     }
@@ -187,7 +187,7 @@ void create_escrow::reclaim(name reclaimer, string dapp, string sym)
                         reclaimer_record->balance -= reclaimer_balance;
                     }
 
-                    row.balance -= reclaimer_balance;
+                    row.total_balance -= reclaimer_balance;
                 }
                 else
                 {
@@ -198,7 +198,7 @@ void create_escrow::reclaim(name reclaimer, string dapp, string sym)
             });
 
             // delete the entire balance object if no contributors are there for the dapp
-            if (nocontributor && iterator->balance == asset(0'0000, create_escrow::getCoreSymbol()))
+            if (nocontributor && iterator->total_balance == asset(0'0000, create_escrow::getCoreSymbol()))
             {
                 balances.erase(iterator);
             }

@@ -17,8 +17,8 @@ using namespace eosio;
 using namespace std;
 
 /*
-     * Returns the total balance contributed for a dapp
-     */
+* Returns the total balance contributed for a dapp
+*/
 asset create_escrow::balanceFor(string &memo)
 {
     balance::Balances balances(_self, _self.value);
@@ -26,12 +26,12 @@ asset create_escrow::balanceFor(string &memo)
     auto payer = balances.find(payerId);
     if (payer == balances.end())
         return asset(0'0000, create_escrow::getCoreSymbol());
-    return payer->balance;
+    return payer->total_balance;
 }
 
 /*
-     * Checks whether the balance for an account is greater than the required balance
-     */
+* Checks whether the balance for an account is greater than the required balance
+*/
 bool create_escrow::hasBalance(string memo, const asset &quantity)
 {
     return balanceFor(memo).amount > quantity.amount;
@@ -52,8 +52,7 @@ void create_escrow::addBalance(const name &from, const asset &quantity, string &
     int ram = dapp == "free" ? 100 : stoi(stats[1]);
     int totalaccounts = stats.size() > 2 ? stoi(stats[2]) : -1;
 
-    asset net_balance = asset(0'0000, core_symbol);
-    asset cpu_balance = asset(0'0000, core_symbol);
+    asset rex_balance = asset(0'0000, core_symbol);
 
     registry::Registry dapps(_self, _self.value);
     auto itr = dapps.find(common::toUUID(dapp));
@@ -68,56 +67,59 @@ void create_escrow::addBalance(const name &from, const asset &quantity, string &
     if (create_escrow::checkIfOwner(from, dapp) || create_escrow::checkIfWhitelisted(from, dapp) || dapp == "free")
     {
         // cpu or net balance are passed in as 1000000 in memo for a value like 100.0000 SYS
-        int64_t net_quantity = stats.size() > 3 ? stoi(stats[3]) : 0'0000;
-        int64_t cpu_quantity = stats.size() > 4 ? stoi(stats[4]) : 0'0000;
+        int64_t rex_quantity = stats.size() > 3 ? stoi(stats[3]) : 0'0000;
 
-        net_balance = asset(net_quantity, core_symbol);
-        cpu_balance = asset(cpu_quantity, core_symbol);
+        rex_balance = asset(rex_quantity, core_symbol);
 
         // deposit rex funds for cpu and net
-        if (itr->use_rex == true)
+        if (rex_balance > asset(0'0000, core_symbol))
         {
-            auto rex_balance = net_balance + cpu_balance;
-            action(
-                permission_level{_self, "active"_n},
-                newAccountContract,
-                name("deposit"),
-                make_tuple(_self, rex_balance))
-                .send();
-        }
-    }
-
-    asset ram_balance = quantity - (net_balance + cpu_balance);
-
-    if (iterator == balances.end())
-        balances.emplace(_self, [&](auto &row) {
-            row.memo = id;
-            row.contributors.push_back({from, ram_balance, ram, net_balance, cpu_balance, totalaccounts, 0});
-            row.balance = ram_balance;
-            row.origin = dapp;
-            row.timestamp = eosio::current_time_point().sec_since_epoch();
-        });
-    else
-        balances.modify(iterator, same_payer, [&](auto &row) {
-            auto pred = [from](const balance::contributors &item) {
-                return item.contributor == from;
-            };
-            std::vector<balance::contributors>::iterator itr = std::find_if(std::begin(row.contributors), std::end(row.contributors), pred);
-            if (itr != std::end(row.contributors))
+            if (itr->use_rex == true)
             {
-                itr->balance += ram_balance;
-                itr->net_balance += net_balance;
-                itr->cpu_balance += cpu_balance;
-                itr->ram = ram;
-                itr->totalaccounts = totalaccounts;
+                action(
+                    permission_level{_self, "active"_n},
+                    newAccountContract,
+                    name("deposit"),
+                    make_tuple(_self, rex_balance))
+                    .send();
             }
             else
             {
-                row.contributors.push_back({from, ram_balance, ram, net_balance, cpu_balance, totalaccounts, 0});
-                row.timestamp = eosio::current_time_point().sec_since_epoch();
+                check(false, ("Rex not enabled for " + dapp).c_str());
             }
-            row.balance += ram_balance;
-        });
+        }
+
+        asset balance = quantity - (rex_balance);
+
+        if (iterator == balances.end())
+            balances.emplace(_self, [&](auto &row) {
+                row.memo = id;
+                row.contributors.push_back({from, balance, rex_balance, asset(0'0000, core_symbol), asset(0'0000, core_symbol), asset(0'0000, core_symbol), ram, totalaccounts, 0});
+                row.total_balance = balance;
+                row.origin = dapp;
+                row.timestamp = eosio::current_time_point().sec_since_epoch();
+            });
+        else
+            balances.modify(iterator, same_payer, [&](auto &row) {
+                auto pred = [from](const balance::contributors &item) {
+                    return item.contributor == from;
+                };
+                std::vector<balance::contributors>::iterator itr = std::find_if(std::begin(row.contributors), std::end(row.contributors), pred);
+                if (itr != std::end(row.contributors))
+                {
+                    itr->balance += balance;
+                    itr->rex_balance += rex_balance;
+                    itr->ram_contribution_percent = ram;
+                    itr->totalaccounts = totalaccounts;
+                }
+                else
+                {
+                    row.contributors.push_back({from, balance, rex_balance, asset(0'0000, core_symbol), asset(0'0000, core_symbol), asset(0'0000, core_symbol), ram, totalaccounts, 0});
+                    row.timestamp = eosio::current_time_point().sec_since_epoch();
+                }
+                row.total_balance += balance;
+            });
+    }
 }
 
 /*
@@ -133,7 +135,7 @@ void create_escrow::subBalance(string memo, string &origin, const asset &quantit
     auto iterator = balances.find(id);
 
     check(iterator != balances.end(), "No balance object");
-    check(iterator->balance.amount >= quantity.amount, "overdrawn balance");
+    check(iterator->total_balance.amount >= quantity.amount, "overdrawn balance");
 
     balances.modify(iterator, same_payer, [&](auto &row) {
         auto pred = [memo](const balance::contributors &item) {
@@ -142,14 +144,16 @@ void create_escrow::subBalance(string memo, string &origin, const asset &quantit
         auto itr = std::find_if(std::begin(row.contributors), std::end(row.contributors), pred);
         if (itr != std::end(row.contributors))
         {
-            row.balance -= quantity;
+            row.total_balance -= quantity;
             itr->balance -= quantity;
+            itr->total_spent += quantity;
+
             if (!memoIsDapp)
             {
                 itr->createdaccounts += 1;
             }
 
-            if (row.balance.amount <= 0 && itr->cpu_balance.amount <= 0 && itr->net_balance.amount <= 0)
+            if (row.total_balance.amount <= 0 && itr->rex_balance.amount <= 0)
             {
                 row.contributors.erase(itr);
             }
@@ -162,7 +166,7 @@ void create_escrow::subBalance(string memo, string &origin, const asset &quantit
 }
 
 /* subtracts the balance used to stake/rex for cpu */
-void create_escrow::subCpuOrNetBalance(string memo, string &origin, const asset &quantity, string type)
+void create_escrow::subCpuOrNetBalance(string memo, string &origin, const asset &quantity, bool use_rex_balance)
 {
     uint64_t id = common::toUUID(origin);
 
@@ -178,21 +182,21 @@ void create_escrow::subCpuOrNetBalance(string memo, string &origin, const asset 
         auto itr = std::find_if(std::begin(row.contributors), std::end(row.contributors), pred);
         if (itr != std::end(row.contributors))
         {
-            if (type == "net")
-            {
-                check(itr->net_balance.amount >= quantity.amount, "overdrawn balance");
-                itr->net_balance -= quantity;
-            }
+            check(itr->balance.amount >= quantity.amount, "overdrawn balance");
+            itr->balance -= quantity;
 
-            if (type == "cpu")
+            if (use_rex_balance)
             {
-                check(itr->cpu_balance.amount >= quantity.amount, "overdrawn balance");
-                itr->cpu_balance -= quantity;
+                itr->total_spent_rex += quantity;
+            }
+            else
+            {
+                itr->total_staked += quantity;
             }
         }
         else
         {
-            check(false, ("The account " + memo + " not found as one of the " + type + " contributors for " + origin).c_str());
+            check(false, ("The account " + memo + " not found as one of the contributors for " + origin).c_str());
         }
     });
 }
@@ -226,19 +230,14 @@ asset create_escrow::findContribution(string dapp, name contributor, string type
         auto itr = std::find_if(std::begin(iterator->contributors), std::end(iterator->contributors), pred);
         if (itr != std::end(iterator->contributors))
         {
-            if (type == "ram")
+            if (type == "ram" || type == "net" || type == "cpu")
             {
                 return itr->balance;
             }
 
-            if (type == "net")
+            if (type == "rex")
             {
-                return itr->net_balance;
-            }
-
-            if (type == "cpu")
-            {
-                return itr->cpu_balance;
+                return itr->rex_balance;
             }
         }
         else
@@ -277,7 +276,7 @@ int create_escrow::findRamContribution(string dapp, name contributor)
         auto itr = std::find_if(std::begin(iterator->contributors), std::end(iterator->contributors), pred);
         if (itr != std::end(iterator->contributors))
         {
-            return itr->ram;
+            return itr->ram_contribution_percent;
         }
         else
         {

@@ -124,20 +124,20 @@ void create_escrow::createJointAccount(string &memo, name &account, string &orig
 
         if (useOwnerNetBalance)
         {
-            create_escrow::subCpuOrNetBalance(owner, origin, net, "net");
+            create_escrow::subCpuOrNetBalance(owner, origin, net, iterator->use_rex);
         }
         else
         {
-            create_escrow::subCpuOrNetBalance(memo, origin, net, "net");
+            create_escrow::subCpuOrNetBalance(memo, origin, net, iterator->use_rex);
         }
 
         if (useOwnerCpuBalance)
         {
-            create_escrow::subCpuOrNetBalance(owner, origin, cpu, "cpu");
+            create_escrow::subCpuOrNetBalance(owner, origin, cpu, iterator->use_rex);
         }
         else
         {
-            create_escrow::subCpuOrNetBalance(memo, origin, cpu, "cpu");
+            create_escrow::subCpuOrNetBalance(memo, origin, cpu, iterator->use_rex);
         }
     }
     else

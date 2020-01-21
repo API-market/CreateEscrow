@@ -20,7 +20,7 @@ CREATOR=${7:-contributor1}
 # app registration
 AIRDROP_JSON='{"contract":"", "tokens":"0 EOS", "limit":"0 EOS"}'
 REX_JSON='{"net_loan_payment":"0.0000 EOS","net_loan_fund":"0.0000 EOS","cpu_loan_payment":"0.0000 EOS","cpu_loan_fund":"0.0000 EOS"}'
-PARAMS_JSON='{"owner":"'$DAPP_OWNER'", "dapp":"'$ORIGIN'", "ram_bytes":"4096", "net":"1.0000 '$CHAIN_SYMBOL'", "cpu":"1.0000 '$CHAIN_SYMBOL'", "airdrop":'$AIRDROP_JSON', "use_rex": false, "rex":'$REX_JSON'}'
+PARAMS_JSON='{"owner":"'$DAPP_OWNER'", "dapp":"'$ORIGIN'", "ram_bytes":"4096", "net":"1.0000 '$CHAIN_SYMBOL'", "cpu":"1.0000 '$CHAIN_SYMBOL'", "airdrop":'$AIRDROP_JSON', "pricekey":0, "use_rex": false, "rex":'$REX_JSON'}'
 $cleos push action createescrow define "$PARAMS_JSON" -p $DAPP_OWNER
 
 # whitelisting

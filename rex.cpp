@@ -13,7 +13,7 @@ void create_escrow::fundnetloan(name &from, name &to, asset quantity, string &or
     create_escrow::checkIfOwnerOrWhitelisted(from, origin);
 
     create_escrow::fundloan(to, quantity, origin, "net");
-    create_escrow::subCpuOrNetBalance(from.to_string(), origin, quantity, "net");
+    create_escrow::subCpuOrNetBalance(from.to_string(), origin, quantity, true);
 }
 
 // finds the existing cpu loan from createescrow to user account and funds it
@@ -22,7 +22,7 @@ void create_escrow::fundcpuloan(name &from, name &to, asset quantity, string &or
     create_escrow::checkIfOwnerOrWhitelisted(from, origin);
 
     create_escrow::fundloan(to, quantity, origin, "cpu");
-    create_escrow::subCpuOrNetBalance(from.to_string(), origin, quantity, "cpu");
+    create_escrow::subCpuOrNetBalance(from.to_string(), origin, quantity, true);
 }
 
 // creates a new loan from createescrow to the user acount (to)
@@ -35,7 +35,7 @@ void create_escrow::rentnet(name &from, name &to, string &origin)
     create_escrow::rentrexnet(origin, to);
 
     asset quantity = iterator->rex->net_loan_payment + iterator->rex->net_loan_fund;
-    create_escrow::subCpuOrNetBalance(from.to_string(), origin, quantity, "net");
+    create_escrow::subCpuOrNetBalance(from.to_string(), origin, quantity, true);
 }
 
 // creates a new loan from createescrow to the user acount (to)
@@ -48,7 +48,7 @@ void create_escrow::rentcpu(name &from, name &to, string &origin)
     create_escrow::rentrexcpu(origin, to);
 
     asset quantity = iterator->rex->cpu_loan_payment + iterator->rex->cpu_loan_fund;
-    create_escrow::subCpuOrNetBalance(from.to_string(), origin, quantity, "cpu");
+    create_escrow::subCpuOrNetBalance(from.to_string(), origin, quantity, true);
 }
 
 // topup existing loan balance (cpu & net) for a user up to the given quantity
@@ -60,8 +60,7 @@ void create_escrow::topuploans(name &from, name &to, asset &cpuquantity, asset &
     asset required_net_bal, required_cpu_bal;
     tie(required_net_bal, required_cpu_bal) = create_escrow::rextopup(to, cpuquantity, netquantity, origin);
 
-    create_escrow::subCpuOrNetBalance(from.to_string(), origin, required_net_bal, "net");
-    create_escrow::subCpuOrNetBalance(from.to_string(), origin, required_cpu_bal, "cpu");
+    create_escrow::subCpuOrNetBalance(from.to_string(), origin, required_net_bal + required_cpu_bal, true);
 }
 
 void create_escrow::rentrexnet(string dapp, name account)
