@@ -91,7 +91,7 @@ struct rammarket
 struct pricetable
 {
     uint64_t key;
-    asset createprice; // newaccount price as ORE
+    uint64_t ramfactor; // an integer value that represents a float number with 4 decimals ( eg. 10000 = 1.0000)
     uint64_t rambytes; // initial amount of ram
     asset netamount;   // initial amount of net
     asset cpuamount;   // initial amount of cpu
@@ -99,7 +99,27 @@ struct pricetable
     uint64_t primary_key() const { return key; }
 };
 
-typedef eosio::multi_index<"pricetable"_n, pricetable> priceTable;
+struct prices
+{
+    name pricename;
+    asset price;
+    uint64_t primary_key() const { return pricename.value; }
+};
+
+struct tiers
+{
+    uint64_t key;
+    uint64_t ramfactor;            // an integer value that represents a float number with 4 decimals ( eg. 10000 = 1.0000)
+    uint64_t rambytes;            // initial amount of ram
+    asset netamount;              // initial amount of net
+    asset cpuamount;              // initial amount of cpu
+
+    uint64_t primary_key() const { return key; }
+};
+
+typedef eosio::multi_index<"tiertable"_n, tiers> tierTable;
+typedef eosio::multi_index<"pricetable"_n, prices> priceTable;
+
 
 typedef eosio::multi_index<"rammarket"_n, rammarket> RamInfo;
 

@@ -173,8 +173,9 @@ private:
   name getNewAccountAction();
   uint64_t getMinimumRAM();
   asset getRamCost(uint64_t ram_bytes, uint64_t priceKey);
-  asset getFixedCpu(uint64_t priceKey);
-  asset getFixedNet(uint64_t priceKey);
+  asset getTierRamPrice(uint64_t tierKey);
+  asset getFixedCpu(uint64_t tierKey);
+  asset getFixedNet(uint64_t tierKey);
 
   auto getCpuLoanRecord(name account);
   auto getNetLoanRecord(name account);

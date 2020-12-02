@@ -61,30 +61,41 @@ asset create_escrow::getRamCost(uint64_t ram_bytes, uint64_t priceKey)
     }
     else
     { //if account is tier fixed
-        Token token(_self, _self.value);
-        name newaccountcontract = create_escrow::getNewAccountContract();
-        priceTable price(newaccountcontract, newaccountcontract.value);
-        auto priceItr = price.find(priceKey);
-        ramcost.amount = priceItr->createprice.amount - (priceItr->netamount.amount + priceItr->cpuamount.amount);
-        ramcost.symbol = priceItr->createprice.symbol;
+        ramcost = create_escrow::getTierRamPrice(priceKey);
     }
     return ramcost;
 }
 
-asset create_escrow::getFixedCpu(uint64_t priceKey)
-{
+asset create_escrow::getTierRamPrice(uint64_t tierKey) {
     name newaccountcontract = create_escrow::getNewAccountContract();
-    priceTable price(newaccountcontract, newaccountcontract.value);
-    auto priceItr = price.find(priceKey);
-    return priceItr->cpuamount;
+    priceTable _prices(newaccountcontract, newaccountcontract.value);
+    tierTable _tiers(newaccountcontract, newaccountcontract.value);
+    auto priceitr = _prices.find(name("minimalaccnt").value);
+    check(priceitr != _prices.end(), "No price found");
+    auto tieritr = _tiers.find(tierKey);
+    check(tieritr != _tiers.end(), "No tier found");
+    asset price;
+    price = priceitr->price;
+    price.amount =  uint64_t(priceitr->price.amount * tieritr->ramfactor / 10000);
+    return price;
 }
 
-asset create_escrow::getFixedNet(uint64_t priceKey)
+asset create_escrow::getFixedCpu(uint64_t tierKey)
 {
     name newaccountcontract = create_escrow::getNewAccountContract();
-    priceTable price(newaccountcontract, newaccountcontract.value);
-    auto priceItr = price.find(priceKey);
-    return priceItr->netamount;
+    tierTable _tiers(newaccountcontract, newaccountcontract.value);
+    auto tieritr = _tiers.find(tierKey);
+    check(tieritr != _tiers.end(), "No tier found");
+    return tieritr->cpuamount;
+}
+
+asset create_escrow::getFixedNet(uint64_t tierKey)
+{
+    name newaccountcontract = create_escrow::getNewAccountContract();
+    tierTable _tiers(newaccountcontract, newaccountcontract.value);
+    auto tieritr = _tiers.find(tierKey);
+    check(tieritr != _tiers.end(), "No tier found");
+    return tieritr->netamount;
 }
 
 auto create_escrow::getCpuLoanRecord(name account)
