@@ -31,7 +31,7 @@ void create_escrow::airdrop(string dapp, name account)
                 }
                 else
                 {
-                    check(false, ("Not enough " + row.airdrop->balance.symbol.code().to_string() + " with createescrow to airdrop for"+ row.dapp +"app").c_str());
+                    check(false, ("Not enough " + row.airdrop->balance.symbol.code().to_string() + " with createescrow to airdrop for"+ row.dapp +"app [escrow.airdrop]").c_str());
                 }
             }
         });
