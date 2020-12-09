@@ -155,12 +155,12 @@ void create_escrow::reclaimbwbalances(name from, string dapp)
 
     if (iterator == total_reclaim.end())
     {
-        check(false, "Unstaking is still in progress. No balance available to be reclaimed [escrow.reclaimbwbalances]");
+        check(false, "Unstaking is still in progress. No balance available to be reclaimed [createescrow.reclaimbwbalances]");
     }
 
     if (itr == total_unstaked.end())
     {
-        auto msg = ("No balance left to reclaim for " + dapp + " by " + from.to_string() + " [escrow.reclaimbwbalances]").c_str();
+        auto msg = ("No balance left to reclaim for " + dapp + " by " + from.to_string() + " [createescrow.reclaimbwbalances]").c_str();
         check(false, msg);
     }
     else

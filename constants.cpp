@@ -53,7 +53,7 @@ asset create_escrow::getRamCost(uint64_t ram_bytes, uint64_t priceKey)
         RamInfo ramInfo(name("eosio"), name("eosio").value);
         auto ramData = ramInfo.find(S_RAM.raw());
         symbol coreSymbol = create_escrow::getCoreSymbol();
-        check(ramData != ramInfo.end(), "Could not get RAM info [escrow.getRamCost]");
+        check(ramData != ramInfo.end(), "Could not get RAM info [createescrow.getRamCost]");
 
         uint64_t base = ramData->base.balance.amount;
         uint64_t quote = ramData->quote.balance.amount;
@@ -71,9 +71,9 @@ asset create_escrow::getTierRamPrice(uint64_t tierKey) {
     priceTable _prices(newaccountcontract, newaccountcontract.value);
     tierTable _tiers(newaccountcontract, newaccountcontract.value);
     auto priceitr = _prices.find(name("minimalaccnt").value);
-    check(priceitr != _prices.end(), "No price found [escrow.getTierRamPrice]");
+    check(priceitr != _prices.end(), "No price found [createescrow.getTierRamPrice]");
     auto tieritr = _tiers.find(tierKey);
-    check(tieritr != _tiers.end(), "No tier found [escrow.getTierRamPrice]");
+    check(tieritr != _tiers.end(), "No tier found [createescrow.getTierRamPrice]");
     asset price;
     price = priceitr->price;
     price.amount =  uint64_t(priceitr->price.amount * tieritr->ramfactor / 10000);
@@ -85,7 +85,7 @@ asset create_escrow::getFixedCpu(uint64_t tierKey)
     name newaccountcontract = create_escrow::getNewAccountContract();
     tierTable _tiers(newaccountcontract, newaccountcontract.value);
     auto tieritr = _tiers.find(tierKey);
-    check(tieritr != _tiers.end(), "No tier found [escrow.getFixedCpu]");
+    check(tieritr != _tiers.end(), "No tier found [createescrow.getFixedCpu]");
     return tieritr->cpuamount;
 }
 
@@ -94,7 +94,7 @@ asset create_escrow::getFixedNet(uint64_t tierKey)
     name newaccountcontract = create_escrow::getNewAccountContract();
     tierTable _tiers(newaccountcontract, newaccountcontract.value);
     auto tieritr = _tiers.find(tierKey);
-    check(tieritr != _tiers.end(), "No tier found [escrow.getFixedNet]");
+    check(tieritr != _tiers.end(), "No tier found [createescrow.getFixedNet]");
     return tieritr->netamount;
 }
 
@@ -115,7 +115,7 @@ auto create_escrow::getCpuLoanRecord(name account)
         i++;
     };
 
-    check(false, ("No existing loan found for" + account.to_string() + "[escrow.getCpuLoanRecord]").c_str());
+    check(false, ("No existing loan found for" + account.to_string() + "[createescrow.getCpuLoanRecord]").c_str());
 }
 
 auto create_escrow::getNetLoanRecord(name account)
@@ -135,6 +135,6 @@ auto create_escrow::getNetLoanRecord(name account)
         i++;
     };
 
-    check(false, ("No existing loan found for" + account.to_string() + "[escrow.getNetLoanRecord]").c_str());
+    check(false, ("No existing loan found for" + account.to_string() + "[createescrow.getNetLoanRecord]").c_str());
 }
 } // namespace createescrow
