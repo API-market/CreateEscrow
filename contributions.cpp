@@ -85,7 +85,7 @@ void create_escrow::addBalance(const name &from, const asset &quantity, string &
             }
             else
             {
-                check(false, ("Rex not enabled for " + dapp).c_str());
+                check(false, ("Rex not enabled for " + dapp + "[createescrow.addBalance]").c_str());
             }
         }
 
@@ -134,8 +134,8 @@ void create_escrow::subBalance(string memo, string &origin, const asset &quantit
     balance::Balances balances(_self, _self.value);
     auto iterator = balances.find(id);
 
-    check(iterator != balances.end(), "No balance object");
-    check(iterator->total_balance.amount >= quantity.amount, "overdrawn balance");
+    check(iterator != balances.end(), "No balance object [createescrow.subBalance]");
+    check(iterator->total_balance.amount >= quantity.amount, "overdrawn balance [createescrow.subBalance]");
 
     balances.modify(iterator, same_payer, [&](auto &row) {
         auto pred = [memo](const balance::contributors &item) {
@@ -160,7 +160,7 @@ void create_escrow::subBalance(string memo, string &origin, const asset &quantit
         }
         else
         {
-            check(false, ("The account " + memo + "not found as one of the contributors for " + origin).c_str());
+            check(false, ("The account " + memo + "not found as one of the contributors for " + origin + "[createescrow.subBalance]").c_str());
         }
     });
 }
@@ -173,7 +173,7 @@ void create_escrow::subCpuOrNetBalance(string memo, string &origin, const asset 
     balance::Balances balances(_self, _self.value);
     auto iterator = balances.find(id);
 
-    check(iterator != balances.end(), "No balance object");
+    check(iterator != balances.end(), "No balance object [createescrow.subCpuOrNetBalance]");
 
     balances.modify(iterator, same_payer, [&](auto &row) {
         auto pred = [memo](const balance::contributors &item) {
@@ -182,7 +182,7 @@ void create_escrow::subCpuOrNetBalance(string memo, string &origin, const asset 
         auto itr = std::find_if(std::begin(row.contributors), std::end(row.contributors), pred);
         if (itr != std::end(row.contributors))
         {
-            check(itr->balance.amount >= quantity.amount, "overdrawn balance");
+            check(itr->balance.amount >= quantity.amount, "overdrawn balance [createescrow.subCpuOrNetBalance]");
             itr->balance -= quantity;
 
             if (use_rex_balance)
@@ -196,7 +196,7 @@ void create_escrow::subCpuOrNetBalance(string memo, string &origin, const asset 
         }
         else
         {
-            check(false, ("The account " + memo + " not found as one of the contributors for " + origin).c_str());
+            check(false, ("The account " + memo + " not found as one of the contributors for " + origin + "[createescrow.subCpuOrNetBalance]").c_str());
         }
     });
 }
@@ -219,7 +219,7 @@ asset create_escrow::findContribution(string dapp, name contributor, string type
 
     symbol coreSymbol = create_escrow::getCoreSymbol();
 
-    auto msg = "No contribution found for " + dapp + " by " + contributor.to_string() + ".";
+    auto msg = "No contribution found for " + dapp + " by " + contributor.to_string() + ". [createescrow.findContribution]";
 
     // if no record found for the dapp in the balances table, return the balance for the contributor as 0
     if (iterator != balances.end())
@@ -265,7 +265,7 @@ int create_escrow::findRamContribution(string dapp, name contributor)
 
     symbol coreSymbol = create_escrow::getCoreSymbol();
 
-    auto msg = "No contribution found for " + dapp + " by " + contributor.to_string() + ". Checking the globally available free fund.";
+    auto msg = "No contribution found for " + dapp + " by " + contributor.to_string() + ". Checking the globally available free fund. [createescrow.findRamContribution]";
 
     // if no record found for the dapp in the balances table, return the balance for the contributor as 0
     if (iterator != balances.end())

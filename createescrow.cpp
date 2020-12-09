@@ -90,11 +90,11 @@ void create_escrow::define(name &owner, string dapp, uint64_t ram_bytes, asset n
     auto iterator = dapps.find(toUUID(dapp));
 
     check(iterator == dapps.end() || (iterator != dapps.end() && iterator->owner == owner),
-          ("the dapp " + dapp + " is already registered by another account").c_str());
+          ("the dapp " + dapp + " is already registered by another account [createescrow.define]").c_str());
 
     uint64_t min_ram = create_escrow::getMinimumRAM();
 
-    check(ram_bytes >= min_ram, ("ram for new accounts must be equal to or greater than " + to_string(min_ram) + " bytes.").c_str());
+    check(ram_bytes >= min_ram, ("ram for new accounts must be equal to or greater than " + to_string(min_ram) + " bytes. [createescrow.define]").c_str());
 
     // Creating a new dapp reference
     if (iterator == dapps.end())
@@ -141,7 +141,7 @@ void create_escrow::whitelist(name owner, name account, string dapp)
         });
 
     else
-        check(false, ("the dapp " + dapp + " is not owned by account " + owner.to_string()).c_str());
+        check(false, ("the dapp " + dapp + " is not owned by account " + owner.to_string() + "[createescrow.whitelist]").c_str());
 }
 
 /***
@@ -191,7 +191,7 @@ void create_escrow::reclaim(name reclaimer, string dapp, string sym)
                 }
                 else
                 {
-                    check(false, ("no remaining contribution for " + dapp + " by " + reclaimer.to_string()).c_str());
+                    check(false, ("no remaining contribution for " + dapp + " by " + reclaimer.to_string() + " [createescrow.reclaim]").c_str());
                 }
 
                 nocontributor = row.contributors.empty();
@@ -218,7 +218,7 @@ void create_escrow::reclaim(name reclaimer, string dapp, string sym)
         }
         else
         {
-            check(false, ("no funds given by " + reclaimer.to_string() + " for " + dapp).c_str());
+            check(false, ("no funds given by " + reclaimer.to_string() + " for " + dapp + " [createescrow.reclaim]").c_str());
         }
     }
     // user is trying to reclaim custom dapp tokens
@@ -242,12 +242,12 @@ void create_escrow::reclaim(name reclaimer, string dapp, string sym)
                     }
                     else
                     {
-                        check(false, ("No remaining airdrop balance for " + dapp + ".").c_str());
+                        check(false, ("No remaining airdrop balance for " + dapp + ". [createescrow.reclaim]").c_str());
                     }
                 }
                 else
                 {
-                    check(false, ("the remaining airdrop balance for " + dapp + " can only be claimed by its owner/whitelisted account.").c_str());
+                    check(false, ("the remaining airdrop balance for " + dapp + " can only be claimed by its owner/whitelisted account. [createescrow.reclaim]").c_str());
                 }
             });
     }
@@ -321,11 +321,11 @@ bool create_escrow::checkIfOwnerOrWhitelisted(name account, string origin)
         else if (origin == "free")
             print("using globally available free funds to create account");
         else
-            check(false, ("only owner or whitelisted accounts can call this action for " + origin).c_str());
+            check(false, ("only owner or whitelisted accounts can call this action for " + origin + "[createescrow.checkIfOwnerOrWhitelisted]").c_str());
     }
     else
     {
-        check(false, ("no owner account found for " + origin).c_str());
+        check(false, ("no owner account found for " + origin + "[createescrow.checkIfOwnerOrWhitelisted]").c_str());
     }
 }
 
